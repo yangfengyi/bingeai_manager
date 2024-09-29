@@ -35,7 +35,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { formatDate } from '@/lib/utils';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export interface Message {
   id: number;
@@ -98,21 +106,42 @@ export const columns: ColumnDef<Message>[] = [
     accessorKey: 'content',
     header: '用户发送内容',
     cell: ({ row }) => (
-      <div className='max-w-[200px] truncate' title={row.getValue('content')}>
-        {row.getValue('content')}
-      </div>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger>
+            <div
+              className='max-w-[200px] line-clamp-1'
+              title={row.getValue('content')}
+            >
+              {row.getValue('content')}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{row.getValue('content')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     ),
   },
   {
     accessorKey: 'txt_content',
     header: 'AI 回复内容',
     cell: ({ row }) => (
-      <div
-        className='max-w-[200px] truncate'
-        title={row.getValue('txt_content')}
-      >
-        {row.getValue('txt_content')}
-      </div>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger>
+            <div
+              className='max-w-[200px] line-clamp-1'
+              title={row.getValue('content')}
+            >
+              {row.getValue('txt_content')}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{row.getValue('txt_content')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     ),
   },
   {
@@ -139,7 +168,7 @@ export const columns: ColumnDef<Message>[] = [
     accessorKey: 'type',
     header: '消息类型',
     cell: ({ row }) => (
-      <div>{row.getValue('type') === 1 ? '用户询问' : 'AI主动发送'}</div>
+      <div>{row.getValue('type') === 0 ? '用户询问' : 'AI主动发送'}</div>
     ),
   },
   {
@@ -158,6 +187,13 @@ export const columns: ColumnDef<Message>[] = [
     cell: ({ row }) => (
       <div>{formatDate(new Date(row.getValue('created_at')))}</div>
     ),
+    filterFn: (row, columnId, filterValue: [Date, Date]) => {
+      if (!filterValue || filterValue.length !== 2) return true;
+      const [start, end] = filterValue;
+      const cellValue = row.getValue(columnId) as string;
+      const cellDate = new Date(cellValue);
+      return cellDate >= start && cellDate <= end;
+    },
   },
   {
     id: 'actions',
@@ -203,7 +239,10 @@ export default function MessageList({ data }: { data: Message[] }) {
   const [emailFilter, setEmailFilter] = React.useState('');
   const [videoIdFilter, setVideoIdFilter] = React.useState('');
   const [contentFilter, setContentFilter] = React.useState('');
+  const [txtContentFilter, setTxtContentFilter] = React.useState('');
   const [typeFilter] = React.useState<string | undefined>(undefined);
+  const [startDate, setStartDate] = React.useState<Date | null>(null);
+  const [endDate, setEndDate] = React.useState<Date | null>(null);
 
   const table = useReactTable({
     data,
@@ -224,6 +263,7 @@ export default function MessageList({ data }: { data: Message[] }) {
     },
     filterFns: {
       fuzzy: (row, columnId, value) => {
+        console.log(value);
         const rowValue = row.getValue(columnId) as string;
         return rowValue.toLowerCase().includes(value.toLowerCase());
       },
@@ -234,14 +274,23 @@ export default function MessageList({ data }: { data: Message[] }) {
     table.getColumn('uemail')?.setFilterValue(emailFilter);
     table.getColumn('video_id')?.setFilterValue(videoIdFilter);
     table.getColumn('content')?.setFilterValue(contentFilter);
-    table.getColumn('txt_content')?.setFilterValue(contentFilter);
-    if (typeFilter !== undefined) {
-      console.log(typeFilter);
-      table.getColumn('type')?.setFilterValue(typeFilter);
+    table.getColumn('txt_content')?.setFilterValue(txtContentFilter);
+
+    if (startDate && endDate) {
+      table.getColumn('created_at')?.setFilterValue([startDate, endDate]);
     } else {
-      table.getColumn('type')?.setFilterValue(null);
+      table.getColumn('created_at')?.setFilterValue(undefined);
     }
-  }, [table, emailFilter, videoIdFilter, contentFilter, typeFilter]);
+  }, [
+    table,
+    emailFilter,
+    videoIdFilter,
+    contentFilter,
+    txtContentFilter,
+    typeFilter,
+    startDate,
+    endDate,
+  ]);
 
   return (
     <div className='w-full'>
@@ -250,21 +299,52 @@ export default function MessageList({ data }: { data: Message[] }) {
           <Input
             placeholder='Search by email...'
             value={emailFilter}
-            onChange={(event) => setEmailFilter(event.target.value)}
+            onChange={(event) => setEmailFilter(event.target.value?.trim())}
             className='max-w-sm'
           />
           <Input
             placeholder='Search by video ID...'
             value={videoIdFilter}
-            onChange={(event) => setVideoIdFilter(event.target.value)}
+            onChange={(event) => setVideoIdFilter(event.target.value?.trim())}
             className='max-w-sm'
           />
           <Input
             placeholder='Search in content...'
             value={contentFilter}
-            onChange={(event) => setContentFilter(event.target.value)}
+            onChange={(event) => setContentFilter(event.target.value?.trim())}
             className='max-w-sm'
           />
+          <Input
+            placeholder='Search in txt_content...'
+            value={txtContentFilter}
+            onChange={(event) =>
+              setTxtContentFilter(event.target.value?.trim())
+            }
+            className='max-w-sm'
+          />
+          <div className='flex items-center space-x-2'>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              showTimeSelect
+              timeIntervals={60}
+              timeCaption='Time'
+              dateFormat='MMMM d, yyyy h:mm aa'
+              placeholderText='Start Date'
+              className='border p-2 rounded'
+            />
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              selectsEnd
+              showTimeSelect
+              timeIntervals={60}
+              timeCaption='Time'
+              dateFormat='MMMM d, yyyy h:mm aa'
+              placeholderText='End Date'
+              className='border p-2 rounded'
+            />
+          </div>
         </div>
         {/* <Select
           value={typeFilter}
