@@ -7,9 +7,6 @@ import { UserRecendMessages } from './(components)/messages/user-recend-messages
 import { LatestRegisteredUsers } from './(components)/user/latest-registered-users';
 import { getUserCount } from './(components)/user/user-query-action';
 
-export const description =
-  'An application shell with a header and main content area. The header has a navbar, a search input and and a user nav dropdown. The user nav is toggled by a button with an avatar image.';
-
 export default async function Dashboard() {
   const userCount = await getUserCount();
   const messageCount = await getMessageCount();

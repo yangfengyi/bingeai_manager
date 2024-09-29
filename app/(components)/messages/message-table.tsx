@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/utils';
 
-interface Message {
+export interface Message {
   id: number;
   timestamp: string;
   content: string;
@@ -203,9 +203,7 @@ export default function MessageList({ data }: { data: Message[] }) {
   const [emailFilter, setEmailFilter] = React.useState('');
   const [videoIdFilter, setVideoIdFilter] = React.useState('');
   const [contentFilter, setContentFilter] = React.useState('');
-  const [typeFilter, setTypeFilter] = React.useState<string | undefined>(
-    undefined
-  );
+  const [typeFilter] = React.useState<string | undefined>(undefined);
 
   const table = useReactTable({
     data,

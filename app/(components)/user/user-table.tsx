@@ -36,7 +36,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-interface User {
+export interface User {
   id: number;
   email: string;
   first_name: string;
