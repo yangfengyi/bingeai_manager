@@ -65,7 +65,9 @@ export async function LatestRegisteredUsers() {
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{formatDate(user?.created_at)}</TableCell>
-                <TableCell className='text-right'>{user.invite_code}</TableCell>
+                <TableCell className='text-right'>
+                  {user?.invite_code}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
