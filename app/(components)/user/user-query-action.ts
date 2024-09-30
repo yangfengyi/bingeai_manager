@@ -43,7 +43,7 @@ export async function getLatestUsers() {
     try {
       const result = await client.query(`
         SELECT id, email, first_name, last_name, disabled, 
-               created_at, updated_at, rid, credit, invite_code 
+              created_at, updated_at, rid, credit 
         FROM "user"
         ORDER BY created_at DESC
         LIMIT 5

@@ -7,6 +7,9 @@ import { UserRecendMessages } from './(components)/messages/user-recend-messages
 import { LatestRegisteredUsers } from './(components)/user/latest-registered-users';
 import { getUserCount } from './(components)/user/user-query-action';
 
+// request comes in, at most once every 60 seconds.
+export const revalidate = 60;
+
 export default async function Dashboard() {
   const userCount = await getUserCount();
   const messageCount = await getMessageCount();
