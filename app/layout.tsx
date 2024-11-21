@@ -54,6 +54,12 @@ export default function RootLayout({
                 Users
               </Link>
               <Link
+                href='/rooms'
+                className='text-foreground transition-colors hover:text-foreground'
+              >
+                Rooms
+              </Link>
+              <Link
                 href='/messages'
                 className='text-foreground transition-colors hover:text-foreground'
               >
