@@ -65,7 +65,10 @@ export function ChatHistoryDrawer({ roomData }: ChatHistoryDrawerProps) {
               >
                 {chat.sender_type === 'role' && (
                   <Avatar className='w-8 h-8'>
-                    <AvatarImage src={chat.role?.avatar} />
+                    <AvatarImage
+                      src={chat.role?.avatar}
+                      className='object-cover'
+                    />
                     <AvatarFallback>
                       {chat.role?.role_name?.[0]?.toUpperCase()}
                     </AvatarFallback>

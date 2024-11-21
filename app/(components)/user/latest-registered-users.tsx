@@ -54,7 +54,7 @@ export async function LatestRegisteredUsers() {
               <TableRow key={user.id}>
                 <TableCell className='flex items-center gap-2'>
                   <Avatar>
-                    <AvatarImage src={user?.avatar} />
+                    <AvatarImage src={user?.avatar} className='object-cover' />
                     <AvatarFallback>
                       {user.first_name?.slice(0, 2)}
                     </AvatarFallback>
